@@ -7,7 +7,6 @@ import './container.css'
 export default function Container() {
   return (
     <div className='container'>
-      {console.log('ok')}
       <List />
       <Chat />
       <Detail />
