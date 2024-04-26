@@ -1,5 +1,5 @@
 import React from 'react'
-import "./list.css"
+import "./list.scss"
 import UserInfo from './userInfo/UserInfo'
 import ChatList from './chatList/ChatList'
 
