@@ -7,7 +7,7 @@ import Notification from '../../components/notification/Notification'
 import './container.css'
 
 export default function Container() {
-  const user = true;
+  const user = false;
 
   return (
     <div className='container'>
