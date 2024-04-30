@@ -1,6 +1,6 @@
 import React from 'react'
 import './detail.scss'
-
+import { auth } from "../../lib/firebase"
 export default function Detail() {
   return (
     <div className='detail'>
@@ -51,7 +51,7 @@ export default function Detail() {
           </div>
         </div>
         <button>Block User</button>
-        <button className='logout'>Log out</button>
+        <button className='logout' onClick={() => auth.signOut()}>Log out</button>
 
       </div>
       <div className="user"></div>
