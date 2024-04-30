@@ -64,9 +64,7 @@ export default function Login() {
 
       await setDoc(doc(db, "userchats", res.user.uid), {
         chats: [],
-
       });
-
 
       toast.success("Account created! You can login now.")
     } catch (err) {

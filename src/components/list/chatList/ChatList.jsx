@@ -9,14 +9,22 @@ import "./chatList.scss"
 export default function ChatList() {
   const [chats, setChats] = useState([]);
   const [addMode, setAddMode] = useState(false);
-
   const { currentUser } = useUserStore()
-  useEffect(() => {
-    const unSub = onSnapshot(doc(db, "userchats", currentUser.id), async (res) => {
-      const item = res.data().chats;
 
-      const promises = item.map(async (item) => {
-        const userDocRef = doc(db, "users", item.recieverId)
+  useEffect(() => {
+    console.log("Oke 1")
+    const unSub = onSnapshot(doc(db, "userchats", currentUser.id), async (res) => {
+      console.log("Oke 2")
+
+      const items = res.data()?.chats;
+      console.log("Oke 3  ")
+      console.log(items);
+      const promises = items?.map(async (item) => {
+        console.log("Oke 4")
+
+        const userDocRef = doc(db, "users", item.receiverID)
+        console.log(userDocRef)
+
         const userDocSnap = await getDoc(userDocRef)
 
         const user = userDocSnap.data()
@@ -25,16 +33,14 @@ export default function ChatList() {
 
       })
 
-      const chatData = await Promise.all(promises)
-      setChats(chatData.sort((a, b) => b.updateAt - a.updateAt))
+      const chatData = await Promise?.all(promises)
+      setChats(chatData.sort((a, b) => b.updatedAt - a.updatedAt))
     });
 
     return () => {
       unSub()
     }
   }, [currentUser.id])
-
-  console.log(chats);
   return (
     <div className="chatList">
       <div className="search">
@@ -50,11 +56,14 @@ export default function ChatList() {
       </div>
       {chats.map((chat) => (
 
-        <div className="item" key={chat.chatId}>
-          <img src="./avatar.png" alt="" />
+        <div
+          className="item"
+          key={chat.chatId}>
+          <img src="./avatar.png" alt=""
+          />
           <div className="texts">
-            <span>Kento</span>
-            <p>chat.lastMessage</p>
+            <span>{chat.user.username}</span>
+            <p>{chat.lastMessage}</p>
           </div>
         </div>
 
