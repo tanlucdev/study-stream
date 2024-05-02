@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { useUserStore } from "./userStore";
+import { useUserStore } from "./useUserStore";
 
 export const useChatStore = create((set) => ({
   chatId: null,
@@ -37,5 +37,7 @@ export const useChatStore = create((set) => ({
     }
   },
 
-
+  changeBlock: () => {
+    set((state) => ({ ...state, isReceiverBlocked: !state.isReceiverBlocked }));
+  },
 }));
