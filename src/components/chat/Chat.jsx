@@ -1,10 +1,18 @@
 import './chat.scss'
 import EmojiPicker from 'emoji-picker-react'
 import { useEffect, useRef, useState } from 'react'
+import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
+import { useChatStore } from '../../lib/useChatStore';
+import { db } from '../../lib/firebase';
+import { useUserStore } from '../../lib/useUserStore';
+import { async } from '@firebase/util';
 
 export default function Chat() {
+  const [chat, setChat] = useState();
   const [open, setOpen] = useState(false);
   const [text, setText] = useState("");
+  const { currentUser } = useUserStore();
+  const { chatId } = useChatStore();
 
   const endRef = useRef(null)
 
@@ -14,11 +22,60 @@ export default function Chat() {
     }
   }, []);
 
+  useEffect(() => {
+    const unSub = onSnapshot(
+      doc(db, "chats", chatId),
+      (res) => {
+        setChat(res.data());
+      }
+    )
+
+    return () => {
+      unSub();
+    }
+  }, [chatId])
+
   const handleEmoji = (e) => {
     setText((prev) => prev + e.emoji)
     setOpen(false)
   }
 
+  const handleSend = async () => {
+    if (text === "") return;
+
+    try {
+      await updateDoc(doc(db, "chats", chatId), {
+        messages: arrayUnion({
+          senderId: currentUser.id,
+          text,
+          createAt: new Date(),
+        })
+      })
+      const userIDS = [currentUser.id, user.id]
+      userIDS.forEach(async (id) => {
+        const userChatsRef = doc(db, "userchats", id)
+        const userChatsSnapshot = await getDoc(userChatsRef)
+
+        if (userChatsSnapshot.exists()) {
+          const userChatsData = userChatsSnapshot.data()
+
+          const chatIndex = userChatsData.chats.findIndex(chats => chats.chatId === chatId)
+          userChatsData[chatIndex].lastMessage = text
+          userChatsData[chatIndex].isSeen =
+            id === currentUser.id ? true : false
+          userChatsData[chatIndex].updatedAt = Date.now()
+
+          await updateDoc(userChatsRef, {
+            chats: userChatsData.chats,
+          })
+        }
+      })
+
+    }
+    catch (err) {
+      console.log(err);
+    }
+  }
   return (
     <div className='chat'>
       <div className="top">
@@ -36,33 +93,15 @@ export default function Chat() {
         </div>
       </div>
       <div className="center">
-        <div className="message">
-          <img src="./avatar.png" alt="" />
-          <div className="texts">
-            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Repellat soluta hic eius sed. Odit dolorem, ratione ipsam magni beatae, quaerat aperiam non accusamus laboriosam eveniet unde tempora nihil? Beatae, aperiam?</p>
-            <span>1 min ago</span>
+        {chat?.messages?.map((message) => (
+          <div className="message" key={message?.createAt}>
+            {message.img && <img src={message.img} alt="" />}
+            <div className="texts">
+              <p>message.text</p>
+              {/* <span>{message.text}</span> */}
+            </div>
           </div>
-        </div>
-        <div className="message own">
-          <div className="texts">
-            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Repellat soluta hic eius sed. Odit dolorem, ratione ipsam magni beatae, quaerat aperiam non accusamus laboriosam eveniet unde tempora nihil? Beatae, aperiam?</p>
-            <span>1 min ago</span>
-          </div>
-        </div>
-        <div className="message">
-          <img src="./avatar.png" alt="" />
-          <div className="texts">
-            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Repellat soluta hic eius sed. Odit dolorem, ratione ipsam magni beatae, quaerat aperiam non accusamus laboriosam eveniet unde tempora nihil? Beatae, aperiam?</p>
-            <span>1 min ago</span>
-          </div>
-        </div>
-        <div className="message own">
-          <div className="texts">
-            <img src="https://images.pexels.com/photos/21936249/pexels-photo-21936249/free-photo-of-anh-sang-thanh-ph-t-i-toa-nha.jpeg?auto=compress&cs=tinysrgb&w=600&lazy=load" alt="" />
-            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Repellat soluta hic eius sed. Odit dolorem, ratione ipsam magni beatae, quaerat aperiam non accusamus laboriosam eveniet unde tempora nihil? Beatae, aperiam?</p>
-            <span>1 min ago</span>
-          </div>
-        </div>
+        ))}
         <div ref={endRef}></div>
       </div>
       <div className="bottom">
@@ -88,7 +127,7 @@ export default function Chat() {
             <EmojiPicker open={open} onEmojiClick={handleEmoji} />
           </div>
         </div>
-        <button className='sendButton'>Send</button>
+        <button className='sendButton' onClick={handleSend}>Send</button>
 
       </div>
     </div>
