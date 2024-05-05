@@ -5,7 +5,7 @@ import { database } from '../../lib/firebase'
 import { toast } from 'react-toastify'
 import Notification from '../notification/Notification'
 import { db } from '../../lib/firebase'
-
+import './reset_password.scss'
 export default function Reset_password() {
 
   const checkEmailRegistered = async (email) => {
@@ -44,7 +44,7 @@ export default function Reset_password() {
     <div className='reset_password'>
       <h1>Forgot password</h1>
       <form onSubmit={(e) => handleSubmit(e)}>
-        <input type="email" name="email" /> <br />
+        <input type="email" name="email" placeholder='Enter your email...' /> <br />
         <button>Reset</button>
       </form>
       <Notification />
