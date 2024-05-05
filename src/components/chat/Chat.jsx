@@ -129,9 +129,9 @@ export default function Chat() {
     <div className='chat'>
       <div className="top">
         <div className="user">
-          <img src="./avatar.png" alt="" />
+          <img src={user?.avatar || "./avatar.png"} alt="" />
           <div className="texts">
-            <span>Kento</span>
+            <span>{isCurrentUserBlocked || isReceiverBlocked ? "user" : user?.username}</span>
             <p>Hi im kento ne</p>
           </div>
         </div>
@@ -177,9 +177,15 @@ export default function Chat() {
         </div>
         <input
           type="text"
-          placeholder='Type a message...'
+          placeholder=
+          {
+            isCurrentUserBlocked || isReceiverBlocked
+              ? "You cannot send message"
+              : "Type a message..."
+          }
           value={text}
           onChange={(e) => setText(e.target.value)}
+          disabled={isCurrentUserBlocked || isReceiverBlocked}
         />
         <div className="emoji">
           <img
@@ -192,7 +198,11 @@ export default function Chat() {
             <EmojiPicker open={open} onEmojiClick={handleEmoji} />
           </div>
         </div>
-        <button className='sendButton' onClick={handleSend}>Send</button>
+        <button className='sendButton' onClick={handleSend}
+          disabled={isCurrentUserBlocked || isReceiverBlocked}
+        >
+          Send
+        </button>
 
       </div>
     </div>
