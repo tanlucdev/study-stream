@@ -51,24 +51,37 @@ export default function Chat() {
   }
 
   const handleImg = (e) => {
+    console.log("Đã vào handleImg")
+
     if (e.target.files[0]) {
       setImg({
         file: e.target.files[0],
         url: URL.createObjectURL(e.target.files[0])
       })
+      // console.log("> file:", img.file)
+      // console.log("> url:", URL.createObjectURL(e.target.files[0]))
+      handleSend();
     }
+
   }
 
   const handleSend = async () => {
+    console.log("Đã vào")
     if (text === "") return
 
     let imgUrl = null
 
     try {
+      console.log("Có vào try")
       if (img.file) {
         imgUrl = await upload(img.file)
+        if (imgUrl) {
+          console.log("Upload hình ảnh thành công, đường dẫn:", imgUrl);
+        } else {
+          console.log("Upload hình ảnh thất bại");
+        }
       }
-      console.log(imgUrl)
+
       await updateDoc(doc(db, "chats", chatId), {
         messages: arrayUnion({
           senderId: currentUser.id,
@@ -77,6 +90,7 @@ export default function Chat() {
           ...(imgUrl && { img: imgUrl }),
         })
       })
+
       const userIDS = [currentUser.id, user.id]
       userIDS.forEach(async (id) => {
         const userChatsRef = doc(db, "userchats", id)
@@ -100,16 +114,17 @@ export default function Chat() {
     }
     catch (err) {
       console.log(err)
-    } finally {
-      setImg({
-        file: null,
-        imgUrl: "",
-      })
-
-      setText("")
     }
 
+    setImg({
+      file: null,
+      url: "",
+    })
+
+    setText("")
   }
+  { console.log("img.url:", img.url) }
+
   return (
     <div className='chat'>
       <div className="top">
@@ -128,14 +143,20 @@ export default function Chat() {
       </div>
       <div className="center">
         {chat?.messages?.map((message) => (
-          <div className={message.senderId === currentUser?.id ? "message own" : "message"} key={message?.createAt}>
-            {message.img && <img src={message.img} alt="" />}
+          <div
+            className={
+              message.senderId === currentUser?.id ? "message own" : "message"
+            }
+            key={message?.createAt}
+          >
             <div className="texts">
+              {message.img && <img src={message.img} alt="" />}
               <p>{message.text}</p>
               {/* <span>{format(message.createdAt.toDate())}</span> */}
             </div>
           </div>
         ))}
+        {console.log(img.url)}
         {img.url &&
           (<div className="message own">
             <div className="texts">
