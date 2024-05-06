@@ -58,15 +58,12 @@ export default function Chat() {
         file: e.target.files[0],
         url: URL.createObjectURL(e.target.files[0])
       })
-      // console.log("> file:", img.file)
-      // console.log("> url:", URL.createObjectURL(e.target.files[0]))
       handleSend();
     }
 
   }
 
   const handleSend = async () => {
-    console.log("Đã vào")
     if (text === "") return
 
     let imgUrl = null
@@ -75,11 +72,6 @@ export default function Chat() {
       console.log("Có vào try")
       if (img.file) {
         imgUrl = await upload(img.file)
-        if (imgUrl) {
-          console.log("Upload hình ảnh thành công, đường dẫn:", imgUrl);
-        } else {
-          console.log("Upload hình ảnh thất bại");
-        }
       }
 
       await updateDoc(doc(db, "chats", chatId), {
